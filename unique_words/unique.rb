@@ -1,5 +1,5 @@
 class Unique
-  attr_accessor :uniq, :words
+  attr_reader :uniq, :words
 
   def initialize(text)
     @uniq = Hash.new
