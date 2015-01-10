@@ -1,5 +1,9 @@
 class Compress
+  ALPHA_REGEX = /^[[:alpha:]]+$/
+
   def initialize(text)
+    raise TypeError unless text.match(ALPHA_REGEX)
+
     @text = text
     @buffer = []
   end
@@ -28,8 +32,13 @@ class Compress
 end
 
 describe Compress do
-  describe "#compress" do
+  describe "#new" do
+    it "fails if string is not from alphabet" do
+      expect{ described_class.new('a2a') }.to raise_error(TypeError)
+    end
+  end
 
+  describe "#compress" do
     context "compressed string length less than original text" do
       subject { Compress.new("aaaabcccc") }
 
