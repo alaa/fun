@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 func main() {
-	for i := 0; i < 10; i++ {
-		fmt.Println(fib(i))
+	for i := 0; i < 45; i++ {
+		go fmt.Println(fib(i))
 	}
 }
 
