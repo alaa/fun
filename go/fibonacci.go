@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	for i := 0; i < 45; i++ {
+	for i := 0; i <= 45; i++ {
 		go fmt.Println(fib(i))
 	}
 }
