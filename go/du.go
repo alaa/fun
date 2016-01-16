@@ -12,19 +12,18 @@ import (
 func main() {
 	root := "/home/alaa"
 	fileSizes := make(chan int64)
+	var wg sync.WaitGroup
 
-	var n sync.WaitGroup
-
-	n.Add(1)
-	go walk(root, fileSizes, &n)
+	wg.Add(1)
+	go walk(root, fileSizes, &wg)
 
 	go func() {
-		n.Wait()
+		wg.Wait()
 		close(fileSizes)
 	}()
 
 	var tick <-chan time.Time
-	tick = time.Tick(50 * time.Millisecond)
+	tick = time.Tick(100 * time.Millisecond)
 	var nbfiles, nbytes int64
 
 loop:
@@ -49,22 +48,28 @@ func stats(nbfiles, nbytes int64) {
 	fmt.Println("\n")
 }
 
-func walk(root string, sizesCh chan int64, n *sync.WaitGroup) {
-	defer n.Done()
+func walk(root string, sizesCh chan int64, wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	dirs := dirEntries(root)
 	for _, f := range dirs {
 		if f.IsDir() {
-			n.Add(1)
-			go walk(filepath.Join(root, f.Name()), sizesCh, n)
+			wg.Add(1)
+			go walk(filepath.Join(root, f.Name()), sizesCh, wg)
 		}
 		sizesCh <- f.Size()
 	}
 }
 
+var sema = make(chan struct{}, 10)
+
 func dirEntries(path string) []os.FileInfo {
+	sema <- struct{}{}
+	defer func() { <-sema }()
+
 	entries, err := ioutil.ReadDir(path)
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 	return entries
